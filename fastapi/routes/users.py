@@ -81,13 +81,13 @@ async def delete_user_endpoint(user_id: int):
 
 
 # Endpoint for user login
-# @router.post("/users/login")
-# async def login_user(user: UserLogin):
-#    # Fetch user from the database
-#    db_user = await get_user_by_email(user.email,user.password_hash)
+@router.post("/users/login")
+async def login_user(user: UserLogin):
+   # Fetch user from the database
+   db_user = await get_user_by_email(user.email,user.password_hash)
   
-#    if db_user is None:
-#        raise HTTPException(status_code=404, detail="User not found")
+   if db_user is None:
+       raise HTTPException(status_code=404, detail="User not found")
 
 
    # If login is successful, you can return user info (omit password hash)
