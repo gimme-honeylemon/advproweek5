@@ -16,6 +16,22 @@ class EquipmentStockOut(BaseModel):
   location: str = None
   updated_at: datetime
 
+class LocationSummaryOut(BaseModel):
+    location: str
+    total: int
+
+@router.get("/equipment_stock/location_summary", response_model=list[LocationSummaryOut])
+async def get_location_summary():
+    query = """
+        SELECT location, SUM(quantity) AS total
+        FROM equipment_stock
+        GROUP BY location
+        ORDER BY location
+    """
+    results = await database.fetch_all(query)
+    return [dict(r) for r in results]   # <-- convert Record to dict
+
+
 # Create
 @router.post("/equipment_stock/", response_model=EquipmentStockOut)
 async def create_equipment(equipment: EquipmentStockCreate):
@@ -53,3 +69,12 @@ async def delete_equipment(equipment_id: int):
   query = "DELETE FROM equipment_stock WHERE equipment_id=:equipment_id"
   await database.execute(query, {"equipment_id": equipment_id})
   return {"message": f"Equipment {equipment_id} deleted"}
+
+@router.get("/equipment_stock/summary")
+async def get_summary():
+  # Example: return total items and total quantity
+  query_total_items = "SELECT COUNT(*) FROM equipment_stock"
+  query_total_quantity = "SELECT SUM(quantity) FROM equipment_stock"
+  total_items = await database.fetch_val(query_total_items)
+  total_quantity = await database.fetch_val(query_total_quantity)
+  return {"total_items": total_items, "total_quantity": total_quantity}
